@@ -3,6 +3,7 @@ import os
 import sounddevice as sd
 from scipy.io.wavfile import write
 import speech_recognition as sr
+from deep_translator import GoogleTranslator
 
 def record_audio(output_path, duration, sample_rate=44100):
     print(f"Recording for {duration} seconds...")
@@ -25,11 +26,23 @@ def save_transcript(path, text):
     with open(path, 'w') as f:
         f.write(text)
 
+def translate_and_save(text, translations):
+    for lang_code, filename in translations.items():
+        try:
+            translator = GoogleTranslator(source='auto', target=lang_code)
+            translated = translator.translate(text)
+            output_path = os.path.join('output', filename)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(translated)
+            print(f"Translated transcript saved to {output_path}")
+        except Exception as e:
+            print(f"Translation to {lang_code} failed: {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Speech-to-Text Converter")
     parser.add_argument('--record', type=int, help='Record audio from microphone')
     parser.add_argument('--input', type=str, help='Path to an existing audio file (WAV format)')
-    parser.add_argument('--output', type=str, default='output/transcript.txt', help='File to save the transcription')
+    parser.add_argument('--output', type=str, default='output/english.txt', help='File to save the transcription')
 
     args = parser.parse_args()
 
@@ -55,9 +68,18 @@ def main():
 
     print("\nTranscription:")
     print(transcript)
+    print(f"\nTranscript saved to {args.output}\n")
 
     save_transcript(args.output, transcript)
-    print(f"\nTranscript saved to {args.output}")
+    translations = {
+        'kn': 'kannada.txt',
+        'de': 'german.txt',
+        'fr': 'french.txt',
+        'hi': 'hindi.txt',
+        'ta': 'tamil.txt',
+        'ja': 'japanese.txt'
+    }
+    translate_and_save(transcript, translations)
 
 if __name__ == "__main__":
     main()
