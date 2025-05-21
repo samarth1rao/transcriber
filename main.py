@@ -4,7 +4,7 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import speech_recognition as sr
 
-def record_audio(output_path, duration=5, sample_rate=44100):
+def record_audio(output_path, duration, sample_rate=44100):
     print(f"Recording for {duration} seconds...")
     audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
     sd.wait()
@@ -26,8 +26,8 @@ def save_transcript(path, text):
         f.write(text)
 
 def main():
-    parser = argparse.ArgumentParser(description="Simple Speech-to-Text Converter")
-    parser.add_argument('--record', action='store_true', help='Record audio from microphone')
+    parser = argparse.ArgumentParser(description="Speech-to-Text Converter")
+    parser.add_argument('--record', type=int, help='Record audio from microphone')
     parser.add_argument('--input', type=str, help='Path to an existing audio file (WAV format)')
     parser.add_argument('--output', type=str, default='output/transcript.txt', help='File to save the transcription')
 
@@ -41,8 +41,8 @@ def main():
     if args.record:
         print("Recording audio from microphone...")
         audio_file = 'output/recorded.wav'
-        record_audio(audio_file)
-        print("Audio recording complete.")
+        record_audio(audio_file, duration=args.record)
+        print("Audio recording complete. Please wait, this may take a few seconds ...")
         transcript = transcribe_file(audio_file)
     elif args.input:
         if not os.path.isfile(args.input):
